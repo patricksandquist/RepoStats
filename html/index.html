@@ -5,19 +5,28 @@
     <title>RepoStats</title>
   </head>
   <body>
-    <script src="../js/underscore.js"></script>
-    <script src="../js/jquery-2.1.4.js"></script>
-    <script src="../js/backbone.js"></script>
-
+    <!-- Template for searching -->
     <script type="text/template" id="search_template">
       <label>Search</label>
-      <input type="text" id="search_input" />
-      <input type="button" id="search_button" value="Search" />
+      <input type="text" id="search_input"/>
+      <input type="button" id="search_button" value="Search"/>
+      <br></br>
     </script>
 
+    <!-- Two containers for output -->
     <div id="search_container"></div>
     <div id="content_container">RepoStats</div>
 
+    <!-- Load libraries/dependencies -->
+    <script src="../js/lib/underscore.js"></script>
+    <script src="../js/lib/jquery-2.1.4.js"></script>
+    <script src="../js/lib/backbone.js"></script>
+
+    <!-- Load our scripts -->
+    <script src="../js/models/repo.js"></script>
+    <script src="../js/collections/repo-list.js"></script>
+    <script src="../js/views/list-view.js"></script>
+    <script src="../js/views/search-view.js"></script>
     <script src="../js/repoStats.js"></script>
   </body>
 </html>

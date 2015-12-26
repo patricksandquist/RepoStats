@@ -17,22 +17,24 @@
       $.ajax({
         method: 'GET',
         url: 'https://api.github.com/users/7Geese/repos',
-        success: function (data) {
-          // Data is a JSON array of all of the repos
-          _(data).each(function (repoData) {
-            if (data.private === 'false') {
-              var repoToAdd = {
-                name: data.name,
-                fork_count: data.fork_count,
-                language: data.language,
-                created_at: data.created_at
-              };
-
-              this.addRepo(repoToAdd);
-            }
-          }, this);
-        }
+        success: this.handleData.bind(this) // bind context for later use
       });
+    },
+
+    handleData: function (data) {
+      // Data is a JSON array of all of the repos
+      _.each(data, function (repoData) {
+        if (repoData.private === false) {
+          var repoToAdd = {
+            name: repoData.name,
+            fork_count: repoData.forks_count,
+            language: repoData.language,
+            created_at: repoData.created_at
+          };
+
+          this.addRepo(repoToAdd);
+        }
+      }, this);
     },
 
     addRepo: function (data) {
@@ -72,7 +74,7 @@
       }, this);
     },
 
-    appendRepo: function (repo){
+    appendRepo: function (repo) {
       $('div', this.el).append(
         "<div> Name: " + repo.get('name') + "</div><br/>" +
         "<div> Fork Number: " + repo.get('fork_count') + "</div><br/>" +

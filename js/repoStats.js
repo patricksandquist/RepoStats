@@ -23,11 +23,6 @@
 
       // Collection event binder
       this.collection.on('add', this.appendRepo, this);
-      //
-      // // Search event binder
-      // var $searchButton = $('#search_button');
-      // _.extend($searchButton, Backbone.Events);
-      // $searchButton.on('click', this.handleSearch, this);
 
       // Grab the data from GitHub API
       $.ajax({
@@ -73,6 +68,7 @@
       var repos = this.collection.models;
 
       return _.filter(repos, function (repo) {
+        // Include repos that contain the search string
         var repoName = repo.attributes.name.toLowerCase();
         return repoName.indexOf(string.toLowerCase()) > -1;
       });
@@ -148,19 +144,25 @@
     },
 
     render: function() {
+      // Load the template and add to DOM
       var template = _.template($("#search_template").html(), {});
       this.$el.html(template);
     },
 
     events: {
+      // Add a search event to the button
       "click input[type=button]": "handleSearch"
     },
 
-    handleSearch: function (event) {
+    handleSearch: function (e) {
+      e.preventDefault();
+
+      // Build up the filtered list of repos
       var filterData = {
         repos: listView.filterRepos($("#search_input").val())
       };
 
+      // Pass the list to the listView for rendering
       listView.render(filterData);
     }
   });

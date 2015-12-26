@@ -19,7 +19,6 @@
     el: $('#content'),
 
     initialize: function () {
-      // Create the collection
       this.collection = new ReposList();
 
       // Collection event binder
@@ -29,22 +28,20 @@
       $.ajax({
         method: 'GET',
         url: 'https://api.github.com/users/7Geese/repos',
-        success: this.handleJSONData.bind(this)
+        success: this.handleJSONData.bind(this),
+        complete: this.render.bind(this)
       });
 
-      // Initial render
       this.render();
     },
 
     render: function () {
-      // Grab all of the repos
-      var repos = this.collection.models;
-
-      // Sort by fork count, descending
-      repos = repos.sort(function (a, b) {
-        if (a.fork_count > b.fork_count) {
+      // Grab and sort the repos
+      var repos = this.collection.models.sort(function (a, b) {
+        // Fork count, descending
+        if (a.attributes.fork_count > b.attributes.fork_count) {
           return -1;
-        } else if (a.fork_count < b.fork_count) {
+        } else if (a.attributes.fork_count < b.attributes.fork_count) {
           return 1;
         } else {
           return 0;

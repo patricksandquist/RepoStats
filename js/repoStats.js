@@ -157,7 +157,11 @@
     },
 
     handleSearch: function (event) {
-      listView.filterRepos($("#search_input").val());
+      var filterData = {
+        repos: listView.filterRepos($("#search_input").val())
+      };
+
+      listView.render(filterData);
     }
   });
 

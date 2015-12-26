@@ -1,4 +1,4 @@
-(function($) {
+(function() {
   // Model
   var Repo = Backbone.Model.extend({
     defaults: {
@@ -11,36 +11,7 @@
 
   // Collection
   var ReposList = Backbone.Collection.extend({
-    model: Repo,
-
-    initialize: function () {
-      $.ajax({
-        method: 'GET',
-        url: 'https://api.github.com/users/7Geese/repos',
-        success: this.handleData.bind(this) // bind context for later use
-      });
-    },
-
-    handleData: function (data) {
-      // Data is a JSON array of all of the repos
-      _.each(data, function (repoData) {
-        if (repoData.private === false) {
-          var repoToAdd = {
-            name: repoData.name,
-            fork_count: repoData.forks_count,
-            language: repoData.language,
-            created_at: repoData.created_at
-          };
-
-          this.addRepo(repoToAdd);
-        }
-      }, this);
-    },
-
-    addRepo: function (data) {
-      var repo = new Repo(data);
-      this.collection.add(repo); // view updated via 'add' event
-    }
+    model: Repo
   });
 
   // View
@@ -48,17 +19,29 @@
     el: $('#content'),
 
     initialize: function () {
+      // Create the collection
       this.collection = new ReposList();
-      this.collection.bind('add', this.appendRepo); // collection event binder
+
+      // Collection event binder
+      this.collection.on('add', this.appendRepo, this);
+
+      // Grab the data from GitHub API
+      $.ajax({
+        method: 'GET',
+        url: 'https://api.github.com/users/7Geese/repos',
+        success: this.handleJSONData.bind(this)
+      });
+
+      // Initial render
       this.render();
     },
 
     render: function () {
-      var self = this;
+      // Grab all of the repos
       var repos = this.collection.models;
 
+      // Sort by fork count, descending
       repos = repos.sort(function (a, b) {
-        // Sort by fork count, descending
         if (a.fork_count > b.fork_count) {
           return -1;
         } else if (a.fork_count < b.fork_count) {
@@ -68,21 +51,52 @@
         }
       });
 
-      $(this.el).append("<div></div>");
-      _(repos).each(function (repo) {
-        self.appendRepo(repo);
+      // Clear the page
+      this.$el.empty();
+
+      // Add the repos
+      _.each(repos, function (repo) {
+        this.appendRepo(repo);
       }, this);
     },
 
     appendRepo: function (repo) {
-      $('div', this.el).append(
+      // Format the repo data and append it to the page
+      this.$el.append(
         "<div> Name: " + repo.get('name') + "</div><br/>" +
         "<div> Fork Number: " + repo.get('fork_count') + "</div><br/>" +
         "<div> Language: " + repo.get('language') + "</div><br/>" +
         "<div> Creation Date: " + repo.get('created_at') + "</div>"
       );
+    },
+
+    handleJSONData: function (data) {
+      // Take the JSON array of all of the repos and build up the collection
+      _.each(data, function (repoData) {
+        // If the repo is public
+        if (repoData.private === false) {
+          // Take useful data
+          var repoToAdd = {
+            name: repoData.name,
+            fork_count: repoData.forks_count,
+            language: repoData.language,
+            created_at: repoData.created_at
+          };
+
+          // Add it to the collection
+          this.addRepo(repoToAdd);
+        }
+      }, this);
+    },
+
+    addRepo: function (data) {
+      // Make new model
+      var repo = new Repo(data);
+
+      // Trigger view update with 'add' event
+      this.collection.add(repo);
     }
   });
 
   var listView = new ListView();
-}(jQuery));
+}());

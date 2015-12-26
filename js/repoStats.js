@@ -19,12 +19,23 @@
         url: 'https://api.github.com/users/7Geese/repos',
         success: function (data) {
           // Data is a JSON array of all of the repos
+          _(data).each(function (repoData) {
+            if (data.private === 'false') {
+              var repoToAdd = {
+                name: data.name,
+                fork_count: data.fork_count,
+                language: data.language,
+                created_at: data.created_at
+              };
 
+              this.addRepo(repoToAdd);
+            }
+          }, this);
         }
       });
     },
 
-    addRepo: function(data) {
+    addRepo: function (data) {
       var repo = new Repo(data);
       this.collection.add(repo); // view updated via 'add' event
     }
@@ -43,7 +54,8 @@
     render: function () {
       var self = this;
       var repos = this.collection.models;
-      repos = repos.sort(function(a, b) {
+
+      repos = repos.sort(function (a, b) {
         // Sort by fork count, descending
         if (a.fork_count > b.fork_count) {
           return -1;

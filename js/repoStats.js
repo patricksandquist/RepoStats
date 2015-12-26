@@ -14,15 +14,20 @@
     model: Repo
   });
 
-  // View
+  // Repo list View
   var ListView = Backbone.View.extend({
-    el: $('#content'),
+    el: $('#content_container'),
 
     initialize: function () {
       this.collection = new ReposList();
 
       // Collection event binder
       this.collection.on('add', this.appendRepo, this);
+      //
+      // // Search event binder
+      // var $searchButton = $('#search_button');
+      // _.extend($searchButton, Backbone.Events);
+      // $searchButton.on('click', this.handleSearch, this);
 
       // Grab the data from GitHub API
       $.ajax({
@@ -35,18 +40,25 @@
       this.render();
     },
 
-    render: function () {
-      // Grab and sort the repos
-      var repos = this.collection.models.sort(function (a, b) {
-        // Fork count, descending
-        if (a.attributes.fork_count > b.attributes.fork_count) {
-          return -1;
-        } else if (a.attributes.fork_count < b.attributes.fork_count) {
-          return 1;
-        } else {
-          return 0;
-        }
-      });
+    render: function (filterData) {
+      // Either use the filtered list of repos or grab them all
+      var repos;
+      if (typeof filterData === 'undefined' || typeof filterData.repos === 'undefined') {
+        repos = this.collection.models;
+      } else {
+        repos = filterData.repos;
+      }
+
+      // Sort repos by fork count, descending
+      repos = repos.sort(function (a, b) {
+          if (a.attributes.fork_count > b.attributes.fork_count) {
+            return -1;
+          } else if (a.attributes.fork_count < b.attributes.fork_count) {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
 
       // Clear the page
       this.$el.empty();
@@ -57,13 +69,22 @@
       }, this);
     },
 
+    filterRepos: function (string) {
+      var repos = this.collection.models;
+
+      return _.filter(repos, function (repo) {
+        var repoName = repo.attributes.name.toLowerCase();
+        return repoName.indexOf(string.toLowerCase()) > -1;
+      });
+    },
+
     appendRepo: function (repo) {
       // Format the repo data and append it to the page
       this.$el.append(
         "<div><b>Name:</b> " + repo.get('name') + "</div>" +
         "<div><b>Fork Number:</b> " + repo.get('fork_count') + "</div>" +
         "<div><b>Language:</b> " + repo.get('language') + "</div>" +
-        "<div><b>Creation Date:</b> " + repo.get('created_at') + "</div><br/>"
+        "<div><b>Creation Date:</b> " + repo.get('created_at') + "</div></br>"
       );
     },
 
@@ -119,4 +140,26 @@
   });
 
   var listView = new ListView();
+
+  // Search View
+  var SearchView = Backbone.View.extend({
+    initialize: function() {
+      this.render();
+    },
+
+    render: function() {
+      var template = _.template($("#search_template").html(), {});
+      this.$el.html(template);
+    },
+
+    events: {
+      "click input[type=button]": "handleSearch"
+    },
+
+    handleSearch: function (event) {
+      listView.filterRepos($("#search_input").val());
+    }
+  });
+
+  var search_view = new SearchView({ el: $("#search_container") });
 }());

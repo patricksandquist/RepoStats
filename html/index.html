@@ -5,13 +5,19 @@
     <title>RepoStats</title>
   </head>
   <body>
-    <div id="content">
-      RepoStats
-    </div>
-
     <script src="../js/underscore.js"></script>
     <script src="../js/jquery-2.1.4.js"></script>
     <script src="../js/backbone.js"></script>
+
+    <script type="text/template" id="search_template">
+      <label>Search</label>
+      <input type="text" id="search_input" />
+      <input type="button" id="search_button" value="Search" />
+    </script>
+
+    <div id="search_container"></div>
+    <div id="content_container">RepoStats</div>
+
     <script src="../js/repoStats.js"></script>
   </body>
 </html>

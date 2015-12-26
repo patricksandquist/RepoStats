@@ -60,10 +60,10 @@
     appendRepo: function (repo) {
       // Format the repo data and append it to the page
       this.$el.append(
-        "<div> Name: " + repo.get('name') + "</div><br/>" +
-        "<div> Fork Number: " + repo.get('fork_count') + "</div><br/>" +
-        "<div> Language: " + repo.get('language') + "</div><br/>" +
-        "<div> Creation Date: " + repo.get('created_at') + "</div>"
+        "<div><b>Name:</b> " + repo.get('name') + "</div>" +
+        "<div><b>Fork Number:</b> " + repo.get('fork_count') + "</div>" +
+        "<div><b>Language:</b> " + repo.get('language') + "</div>" +
+        "<div><b>Creation Date:</b> " + repo.get('created_at') + "</div><br/>"
       );
     },
 
@@ -74,16 +74,39 @@
         if (repoData.private === false) {
           // Take useful data
           var repoToAdd = {
-            name: repoData.name,
+            name: this.formatName(repoData.name),
             fork_count: repoData.forks_count,
             language: repoData.language,
-            created_at: repoData.created_at
+            created_at: this.formatDate(repoData.created_at)
           };
 
           // Add it to the collection
           this.addRepo(repoToAdd);
         }
       }, this);
+    },
+
+    formatName: function (rawName) {
+      // Makes repo name more readible by taking out hyphens
+      var words = rawName.split('-');
+
+      // And capitolizing important words
+      var output = _.map(words, function (word) {
+        // Only capitolize uncommon words
+        if (["as", "on"].includes(word)) {
+          return word;
+        } else {
+          return word.charAt(0).toUpperCase() + word.slice(1);
+        }
+      });
+
+      return output.join(' ');
+    },
+
+    formatDate: function (date) {
+      // Makes a Date object from the ISO string
+      var d = new Date(date);
+      return d.toDateString();
     },
 
     addRepo: function (data) {
